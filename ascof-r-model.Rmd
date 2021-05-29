@@ -5,14 +5,34 @@ output: html_notebook
 
 ```{r}
 install.packages("tidyverse")
-library(tidyverse)
 
 ```
 
 
 ```{r}
+library(tidyverse)
+
 ascof_df <- read_csv("data/ascof_raw/ascof_sample.csv")
 head(ascof_df)
+```
+
+```{r}
+library(dplyr)
+
+# Filter Response/Non-response = 1
+# Filter Support Setting: Residential Care or Nursing Care = [2, 3]
+ascof_df %>% 
+  filter(resp == 1) %>%
+  filter(SupportSetting == 2 | SupportSetting == 3)
+```
+
+```{r}
+# Adding column based on other column:
+ascof_df %>%
+  mutate(Status = case_when(
+    endsWith(ID, "R") ~ "Recovered",
+    endsWith(ID, "S") ~ "Sick"
+    ))
 ```
 
 
