@@ -1,0 +1,47 @@
+---
+title: "R ASCOF Model"
+output: html_notebook
+---
+
+```{r}
+install.packages("tidyverse")
+library(tidyverse)
+
+```
+
+
+```{r}
+ascof_df <- read_csv("data/ascof_raw/ascof_sample.csv")
+head(ascof_df)
+```
+
+
+```{r}
+surveyData <- read_csv("data/Jansurv_20212601.csv")
+surveyData$key <- paste(surveyData$`Q1.1. Care home name`, surveyData$`Q1.2. Postcode`)
+surveyData$key <- str_replace_all(surveyData$key, " ", "")
+surveyData$key <- str_replace_all(surveyData$key, "-", "")
+head(surveyData)
+```
+
+```{r}
+df_join <- stringdist_join(surveyData, carehomesCQC, 
+                by = "key",
+                mode = "left",
+                ignore_case = TRUE, 
+                method = "jw", 
+                max_dist = 99, 
+                distance_col = "dist") %>%
+  group_by(key.x) %>%
+  slice_min(order_by = dist, n = 1)%>%
+  select(key.x, key.y, dist, everything())
+```
+
+```{r}
+df_join <- df_join[order(df_join$dist),]
+df_join <- df_join[(df_join$dist<1),]
+dim(df_join)
+```
+
+```{r}
+write.csv(df_join,"outputs/join.csv", row.names = FALSE)
