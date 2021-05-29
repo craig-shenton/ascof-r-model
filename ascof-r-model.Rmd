@@ -21,27 +21,68 @@ library(dplyr)
 
 # Filter Response/Non-response = 1
 # Filter Support Setting: Residential Care or Nursing Care = [2, 3]
-ascof_df %>% 
+ascof_df <- ascof_df %>% 
   filter(resp == 1) %>%
   filter(SupportSetting == 2 | SupportSetting == 3)
 ```
 
 ```{r}
-# Adding column based on other column:
-ascof_df %>%
-  mutate(Status = case_when(
-    endsWith(ID, "R") ~ "Recovered",
-    endsWith(ID, "S") ~ "Sick"
-    ))
+
+# Multiple conditions when adding new column to dataframe:
+ascof_df <- ascof_df %>% mutate(Q3a_w =               
+                     case_when(Q3a == 1 ~ 1, 
+                               Q3a == 2 ~ 0.919,
+                               Q3a == 3 ~ 0.541,
+                               Q3a == 4 ~ 0))  %>%
+                     mutate(Q4a_w =
+                     case_when(Q4a == 1 ~ 0.911, 
+                               Q4a == 2 ~ 0.789,
+                               Q4a == 3 ~ 0.265,
+                               Q4a == 4 ~ 0.195)) %>%
+                     mutate(Q5a_w =
+                     case_when(Q5a == 1 ~ 1, 
+                               Q5a == 2 ~ 0.919,
+                               Q5a == 3 ~ 0.541,
+                               Q5a == 4 ~ 0)) %>%
+                     mutate(Q6a_w =
+                     case_when(Q6a == 1 ~ 1, 
+                               Q6a == 2 ~ 0.919,
+                               Q6a == 3 ~ 0.541,
+                               Q6a == 4 ~ 0)) %>%
+                     mutate(Q7a_w =
+                     case_when(Q7a == 1 ~ 1, 
+                               Q7a == 2 ~ 0.919,
+                               Q7a == 3 ~ 0.541,
+                               Q7a == 4 ~ 0)) %>%
+                     mutate(Q8a_w =
+                     case_when(Q8a == 1 ~ 1, 
+                               Q8a == 2 ~ 0.919,
+                               Q8a == 3 ~ 0.541,
+                               Q8a == 4 ~ 0)) %>%
+                       mutate(Q9a_w =
+                     case_when(Q9a == 1 ~ 1, 
+                               Q9a == 2 ~ 0.919,
+                               Q9a == 3 ~ 0.541,
+                               Q9a == 4 ~ 0)) %>%
+                       mutate(Q10_w =
+                     case_when(Q10 == 1 ~ 1, 
+                               Q10 == 2 ~ 0.919,
+                               Q10 == 3 ~ 0.541,
+                               Q10 == 4 ~ 0)) %>%
+                       mutate(Q11_w =
+                     case_when(Q11 == 1 ~ 1, 
+                               Q11 == 2 ~ 0.919,
+                               Q11 == 3 ~ 0.541,
+                               Q11 == 4 ~ 0))
+head(ascof_df)
 ```
 
 
 ```{r}
-surveyData <- read_csv("data/Jansurv_20212601.csv")
-surveyData$key <- paste(surveyData$`Q1.1. Care home name`, surveyData$`Q1.2. Postcode`)
-surveyData$key <- str_replace_all(surveyData$key, " ", "")
-surveyData$key <- str_replace_all(surveyData$key, "-", "")
-head(surveyData)
+df1=data.frame(A=c(1,2,4,8), B=c(4,3,2,9), C=c(10,11,1,2), D=c(12,40,3,4))
+df2=data.frame(A=c(0.5,2.0,0.1,0.3), B=c(1.5,0.5,0.2,0.1), C=c(3.0,1.25,0.5,0.2), D=c(0.7,0.8,0.2,2.0))
+
+as.data.frame(mapply(function(x, y) ifelse(y <= 0.8, x, NA), df1, df2))
 ```
 
 ```{r}
