@@ -40,49 +40,56 @@ ascof_df <- ascof_df %>% mutate(Q3a_w =
                                Q4a == 3 ~ 0.265,
                                Q4a == 4 ~ 0.195)) %>%
                      mutate(Q5a_w =
-                     case_when(Q5a == 1 ~ 1, 
-                               Q5a == 2 ~ 0.919,
-                               Q5a == 3 ~ 0.541,
-                               Q5a == 4 ~ 0)) %>%
+                     case_when(Q5a == 1 ~ 0.879, 
+                               Q5a == 2 ~ 0.775,
+                               Q5a == 3 ~ 0.294,
+                               Q5a == 4 ~ 0.184)) %>%
                      mutate(Q6a_w =
-                     case_when(Q6a == 1 ~ 1, 
-                               Q6a == 2 ~ 0.919,
-                               Q6a == 3 ~ 0.541,
-                               Q6a == 4 ~ 0)) %>%
+                     case_when(Q6a == 1 ~ 0.863, 
+                               Q6a == 2 ~ 0.78,
+                               Q6a == 3 ~ 0.374,
+                               Q6a == 4 ~ 0.288)) %>%
                      mutate(Q7a_w =
-                     case_when(Q7a == 1 ~ 1, 
-                               Q7a == 2 ~ 0.919,
-                               Q7a == 3 ~ 0.541,
-                               Q7a == 4 ~ 0)) %>%
+                     case_when(Q7a == 1 ~ 0.88, 
+                               Q7a == 2 ~ 0.452,
+                               Q7a == 3 ~ 0.298,
+                               Q7a == 4 ~ 0.114)) %>%
                      mutate(Q8a_w =
-                     case_when(Q8a == 1 ~ 1, 
-                               Q8a == 2 ~ 0.919,
-                               Q8a == 3 ~ 0.541,
-                               Q8a == 4 ~ 0)) %>%
+                     case_when(Q8a == 1 ~ 0.873, 
+                               Q8a == 2 ~ 0.748,
+                               Q8a == 3 ~ 0.497,
+                               Q8a == 4 ~ 0.241)) %>%
                        mutate(Q9a_w =
-                     case_when(Q9a == 1 ~ 1, 
-                               Q9a == 2 ~ 0.919,
-                               Q9a == 3 ~ 0.541,
-                               Q9a == 4 ~ 0)) %>%
+                     case_when(Q9a == 1 ~ 0.962, 
+                               Q9a == 2 ~ 0.927,
+                               Q9a == 3 ~ 0.567,
+                               Q9a == 4 ~ 0.927)) %>%
                        mutate(Q10_w =
-                     case_when(Q10 == 1 ~ 1, 
-                               Q10 == 2 ~ 0.919,
-                               Q10 == 3 ~ 0.541,
+                     case_when(Q10 == 1 ~ 0, 
+                               Q10 == 2 ~ 0,
+                               Q10 == 3 ~ 0,
                                Q10 == 4 ~ 0)) %>%
                        mutate(Q11_w =
-                     case_when(Q11 == 1 ~ 1, 
-                               Q11 == 2 ~ 0.919,
-                               Q11 == 3 ~ 0.541,
-                               Q11 == 4 ~ 0))
+                     case_when(Q11 == 1 ~ 0.847, 
+                               Q11 == 2 ~ 0.637,
+                               Q11 == 3 ~ 0.295,
+                               Q11 == 4 ~ 0.263))
 head(ascof_df)
 ```
 
 
 ```{r}
-df1=data.frame(A=c(1,2,4,8), B=c(4,3,2,9), C=c(10,11,1,2), D=c(12,40,3,4))
-df2=data.frame(A=c(0.5,2.0,0.1,0.3), B=c(1.5,0.5,0.2,0.1), C=c(3.0,1.25,0.5,0.2), D=c(0.7,0.8,0.2,2.0))
+# Calculate current utility weighted care-related quality of life (c_utility)
+cols = c('Q3a_w','Q4a_w','Q5a_w','Q6a_w','Q7a_w','Q8a_w','Q9a_w','Q10_w','Q11_w')
+ascof_df$c_util <- ascof_df %>% 
+  select(cols) %>% 
+  transmute(x=rowSums(.)) %>% 
+  pull()
 
-as.data.frame(mapply(function(x, y) ifelse(y <= 0.8, x, NA), df1, df2))
+ascof_df$c_util <- apply(ascof_df$c_util, 1, function(x) (x*0.203)-0.466, na.rm=TRUE)
+
+#(AL8*0.203)-0.466
+head(ascof_df)
 ```
 
 ```{r}
