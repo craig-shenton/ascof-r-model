@@ -27,7 +27,6 @@ ascof_df <- ascof_df %>%
 ```
 
 ```{r}
-
 # Multiple conditions when adding new column to dataframe:
 ascof_df <- ascof_df %>% mutate(Q3a_w =               
                      case_when(Q3a == 1 ~ 1, 
@@ -86,30 +85,61 @@ ascof_df$c_util <- ascof_df %>%
   transmute(x=rowSums(.)) %>% 
   pull()
 
-ascof_df$c_util <- apply(ascof_df$c_util, 1, function(x) (x*0.203)-0.466, na.rm=TRUE)
+ascof_df$c_util <- sapply(ascof_df$c_util, function(x) (x*0.203)-0.466)
 
-#(AL8*0.203)-0.466
+head(ascof_df)
+```
+```{r}
+# Count of I/ADLs with difficulty or unable to do by self without help
+
+ascof_df <- ascof_df %>% 
+  mutate(Q15a_w = ifelse(Q15a > 1, Q15a-1, 0)) %>%
+  mutate(Q15b_w = ifelse(Q15b > 1, Q15b-1, 0)) %>%
+  mutate(Q15c_w = ifelse(Q15c > 1, Q15c-1, 0)) %>%
+  mutate(Q15d_w = ifelse(Q15d > 1, Q15d-1, 0)) %>%
+  mutate(Q16a_w = ifelse(Q16a > 1, Q16a-1, 0)) %>%
+  mutate(Q16b_w = ifelse(Q16b > 1, Q16b-1, 0)) %>%
+  mutate(Q16c_w = ifelse(Q16c > 1, Q16c-1, 0))
+
+cols = c('Q15a_w','Q15b_w','Q15c_w','Q15d_w','Q16a_w','Q16b_w','Q16c_w')
+ascof_df$difficulty_count <- ascof_df %>% 
+  select(cols) %>% 
+  transmute(x=rowSums(.)) %>% 
+  pull()
+
+ascof_df$difficulty_count <- ascof_df$difficulty_count * 0.0202 * -1
+                                   
 head(ascof_df)
 ```
 
 ```{r}
-df_join <- stringdist_join(surveyData, carehomesCQC, 
-                by = "key",
-                mode = "left",
-                ignore_case = TRUE, 
-                method = "jw", 
-                max_dist = 99, 
-                distance_col = "dist") %>%
-  group_by(key.x) %>%
-  slice_min(order_by = dist, n = 1)%>%
-  select(key.x, key.y, dist, everything())
+# IIASC adjustment factors
+
+ascof_df <- ascof_df %>% mutate(agegrp_w = ifelse(agegrp == 2, 0.0473, 0)) %>%
+  mutate(Q13a_w = ifelse(Q13 == 3, -0.0148, 0)) %>%
+  mutate(Q13b_w = ifelse(Q13 == 4 | Q13 == 5, -0.109, 0)) %>%
+  mutate(Q17a_w = ifelse(Q17 == 2, -0.0308, 0)) %>%
+  mutate(Q17b_w = ifelse(Q17 == 3 | Q17 == 3, -0.125, 0)) %>%
+  mutate(Q18a_w = ifelse(Q18 == 2, -0.0603, 0)) %>%
+  mutate(Q18b_w = ifelse(Q18 == 3 | Q18 == 4, -0.11, 0))
+
+cols = c('agegrp_w','Q13a_w','Q13b_w','Q17a_w','Q17b_w','Q18a_w','Q18b_w','difficulty_count')
+ascof_df$adj_fac <- ascof_df %>% 
+  select(cols) %>% 
+  transmute(x=rowSums(.)) %>% 
+  pull()
+
+ascof_df$adj_fac <- ascof_df$adj_fac + 0.5798
+ascof_df$a_util <- ascof_df$c_util-ascof_df$adj_fac
+
+head(ascof_df)
 ```
 
 ```{r}
-df_join <- df_join[order(df_join$dist),]
-df_join <- df_join[(df_join$dist<1),]
-dim(df_join)
+ascof_df <- ascof_df %>% 
+  filter(resp == 1) %>%
+  filter(!is.na(c_util) & (!is.na(a_util)))
+write_csv(ascof_df, "data/outputs/ascof.csv")
 ```
 
-```{r}
-write.csv(df_join,"outputs/join.csv", row.names = FALSE)
+
