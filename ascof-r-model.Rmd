@@ -12,7 +12,7 @@ install.packages("tidyverse")
 ```{r}
 library(tidyverse)
 
-ascof_df <- read_csv("data/ascof_raw/ascof_sample.csv")
+ascof_df <- read_csv("data/ascof_raw/pss-ascs-eng-1415-csv-data.csv")
 head(ascof_df)
 ```
 
@@ -21,9 +21,9 @@ library(dplyr)
 
 # Filter Response/Non-response = 1
 # Filter Support Setting: Residential Care or Nursing Care = [2, 3]
-ascof_df <- ascof_df %>% 
-  filter(resp == 1) %>%
-  filter(SupportSetting == 2 | SupportSetting == 3)
+#ascof_df <- ascof_df %>% 
+#  filter(resp == 1) %>%
+#  filter(SupportSetting == 2 | SupportSetting == 3)
 ```
 
 ```{r}
@@ -62,7 +62,7 @@ ascof_df <- ascof_df %>% mutate(Q3a_w =
                      case_when(Q9a == 1 ~ 0.962, 
                                Q9a == 2 ~ 0.927,
                                Q9a == 3 ~ 0.567,
-                               Q9a == 4 ~ 0.927)) %>%
+                               Q9a == 4 ~ 0.17)) %>%
                        mutate(Q10_w =
                      case_when(Q10 == 1 ~ 0, 
                                Q10 == 2 ~ 0,
@@ -119,7 +119,7 @@ ascof_df <- ascof_df %>% mutate(agegrp_w = ifelse(agegrp == 2, 0.0473, 0)) %>%
   mutate(Q13a_w = ifelse(Q13 == 3, -0.0148, 0)) %>%
   mutate(Q13b_w = ifelse(Q13 == 4 | Q13 == 5, -0.109, 0)) %>%
   mutate(Q17a_w = ifelse(Q17 == 2, -0.0308, 0)) %>%
-  mutate(Q17b_w = ifelse(Q17 == 3 | Q17 == 3, -0.125, 0)) %>%
+  mutate(Q17b_w = ifelse(Q17 == 3 | Q17 == 4, -0.125, 0)) %>%
   mutate(Q18a_w = ifelse(Q18 == 2, -0.0603, 0)) %>%
   mutate(Q18b_w = ifelse(Q18 == 3 | Q18 == 4, -0.11, 0))
 
@@ -136,9 +136,9 @@ head(ascof_df)
 ```
 
 ```{r}
-ascof_df <- ascof_df %>% 
-  filter(resp == 1) %>%
-  filter(!is.na(c_util) & (!is.na(a_util)))
+#ascof_df <- ascof_df %>% 
+#  filter(resp == 1) %>%
+#  filter(!is.na(c_util) & (!is.na(a_util)))
 write_csv(ascof_df, "data/outputs/ascof.csv")
 ```
 
