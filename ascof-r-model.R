@@ -1,20 +1,26 @@
----
-title: "R ASCOF Model"
-output: html_notebook
----
+# title: "R ASCOF Model"
+# output: csv files
   
-install.packages("tidyverse")
+# install.packages("tidyverse")
 library(tidyverse)
 library(dplyr)
+library(readr)
 
-ascof_df <- read_csv("data/ascof_raw/pss-ascs-eng-1415-csv-data.csv")
+file_list <- list.files(path = "C:/Users/Craig/Dropbox/R/ascof-r-model/data/ascof_raw",
+                        pattern = "*.csv", full.names = TRUE)
 
-# Filters commented out for testing
+ascof_df <- map_df(file_list, ~read.csv(.x) %>%
+                     mutate(File = basename(.x))) %>%
+  mutate(LaCode = coalesce(LaCode,cassr)) %>%
+  mutate(Year = as.numeric(str_extract(File, "[0-9]+"))) %>%
+  select(LaCode, Year, File, everything()) %>%
+  select(-c(cassr)) # drop cassr
+
 # Filter Response/Non-response = 1
 # Filter Support Setting: Residential Care or Nursing Care = [2, 3]
 #ascof_df <- ascof_df %>% 
-#  filter(resp == 1) %>%
-#  filter(SupportSetting == 2 | SupportSetting == 3)
+  #filter(resp == 1) %>%
+  #filter(SupportSetting == 2 | SupportSetting == 3)
 
 # Multiple conditions when adding new column to dataframe:
 ascof_df <- ascof_df %>% mutate(Q3a_w =               
@@ -108,8 +114,11 @@ ascof_df$adj_fac <- ascof_df %>%
 ascof_df$adj_fac <- ascof_df$adj_fac + 0.5798
 ascof_df$a_util <- ascof_df$c_util-ascof_df$adj_fac
 
-# filters commented out for testing
+# filters
 #ascof_df <- ascof_df %>% 
-#  filter(resp == 1) %>%
-#  filter(!is.na(c_util) & (!is.na(a_util)))
-write_csv(ascof_df, "data/outputs/ascof.csv")
+  #filter(!is.na(c_util) & (!is.na(a_util)))
+
+# export to .csv
+require(data.table)
+setDT(ascof_df)
+ascof_df[, write.csv(.SD, paste0("data/outputs/ascof_df_", .BY, ".csv")), by = Year]
